@@ -1,6 +1,6 @@
 {
     "name": "My Default Ansible Config Feature",
-    "id": "def-ansible-config",
+    "id": "default-ansible-config",
     "version": "1.0.0",
     "description": "Default configuration for Ansible in a devcontainer.",
     "installsAfter": [
