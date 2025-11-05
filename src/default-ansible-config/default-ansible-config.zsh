@@ -5,8 +5,6 @@ set -e -u -o pipefail
 #chmod 700 /home/vscode/.ssh
 #chmod 600 /home/vscode/.ssh/*
 
-pipx install -q ansible-lint
-
 local VAULT_PASS_DIR="$HOME/bin"
 local VAULT_PASS_FILE="$VAULT_PASS_DIR/ansible-vault-pass.sh"
 local ANSIBLE_CFG_FILE="$HOME/.ansible.cfg"

@@ -1,7 +1,7 @@
 {
     "name": "My Default Ansible Config Feature",
     "id": "default-ansible-config",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Default configuration for Ansible in a devcontainer.",
     "installsAfter": [
         "ghcr.io/nils-geistmann/devcontainers-features/zsh:0",
