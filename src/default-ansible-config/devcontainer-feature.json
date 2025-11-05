@@ -3,6 +3,13 @@
     "id": "default-ansible-config",
     "version": "1.0.0",
     "description": "Default configuration for Ansible in a devcontainer.",
+    "options": {
+        "enableMitogen": {
+            "default": true,
+            "type": "boolean",
+            "description": "Enable Mitogen for Ansible to improve performance."
+        }
+    },
     "installsAfter": [
         "ghcr.io/nils-geistmann/devcontainers-features/zsh:0",
         "ghcr.io/devcontainers-extra/features/ansible"

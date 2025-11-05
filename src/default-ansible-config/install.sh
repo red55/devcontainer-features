@@ -27,11 +27,16 @@ if [ -z "$ANSIBLE_CONFIGURED" ]; then
     echo "Ansible configuration located at $ANSIBLE_CFG_FILE"
     echo "[defaults]" >> $ANSIBLE_CFG_FILE
     echo "vault_password_file=$VAULT_PASS_FILE" >> $ANSIBLE_CFG_FILE
-    local venvs=$(pipx list | grep -F "venvs are in " | awk '{print $4;}')
-    local python_version=$(python3 --version | awk '{print $2;}' | cut -d. -f1,2)
-    echo "strategy_plugins=$venvs/ansible-core/lib/python$python_version/site-packages/ansible_mitogen/plugins/strategy" >> $ANSIBLE_CFG_FILE
-    echo "strategy=mitogen_linear" >> $ANSIBLE_CFG_FILE
     echo "callbacks_enabled = ansible.posix.profile_tasks, ansible.posix.timer" >> $ANSIBLE_CFG_FILE
+    local ENABLE_MITOGEN=${ENABLEMITOGEN:-"true"}
+    if [ "$ENABLE_MITOGEN" = "true" ]; then
+        echo "Enabling Mitogen for Ansible."
+        local venvs=$(pipx list | grep -F "venvs are in " | awk '{print $4;}')
+        local python_version=$(python3 --version | awk '{print $2;}' | cut -d. -f1,2)
+        echo "strategy_plugins=$venvs/ansible-core/lib/python$python_version/site-packages/ansible_mitogen/plugins/strategy" >> $ANSIBLE_CFG_FILE
+        echo "strategy=mitogen_linear" >> $ANSIBLE_CFG_FILE
+    fi
+
 else
     echo "Ansible is already configured."
 fi
