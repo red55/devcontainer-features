@@ -12,21 +12,27 @@ echo "Running under CI: $UNDER_CI"
 if [ -f $VAULT_PASS_FILE ]; then
     chmod u+x $VAULT_PASS_FILE
 else
-    local VAULT_PASS=""
-    echo "Warning: $VAULT_PASS_FILE not found, creating it."
-    if [ "$UNDER_CI" = "true" ]; then
-        if [ -z "${ANSIBLE_VAULT_PASSWORD:-}" ]; then
+    local VAULT_PASS="${ANSIBLE_VAULT_PASSWORD:-}"
+
+    echo "Warning: $VAULT_PASS_FILE not found."
+
+    if [ "$UNDER_CI" = "true"  ]; then
+        if [ -z "$VAULT_PASS" ]; then
             echo "Warning: ANSIBLE_VAULT_PASSWORD environment variable is not set in CI environment."
         fi
-        VAULT_PASS="$ANSIBLE_VAULT_PASSWORD"
     else
         read -s "VAULT_PASS?Enter Ansible Vault password: "
     fi
-    mkdir -p "$VAULT_PASS_DIR"
-    printf "#!/bin/sh\necho -n '%s'\n" "$VAULT_PASS" > "$VAULT_PASS_FILE"
-    VAULT_PASS=""
-    unset VAULT_PASS
-    chmod u+x "$VAULT_PASS_FILE"
+    if [ ! -z "$VAULT_PASS" ]; then
+        mkdir -p "$VAULT_PASS_DIR"
+        printf "#!/bin/sh\necho -n '%s'\n" "$VAULT_PASS" > "$VAULT_PASS_FILE"
+        VAULT_PASS=""
+        unset VAULT_PASS
+        chmod u+x "$VAULT_PASS_FILE"
+        echo "Created vault password file at $VAULT_PASS_FILE"
+    else
+        echo "No vault password provided. Skipping vault password file creation."
+    fi
 fi
 echo ""
 
@@ -37,7 +43,11 @@ if [ -z "$ANSIBLE_CONFIGURED" ]; then
     if [ -f "$VAULT_PASS_FILE" ]; then
         echo "vault_password_file=$VAULT_PASS_FILE" >> $ANSIBLE_CFG_FILE
     fi
+    if [ "$UNDER_CI" = "true"  ]; then
+        echo "result_format=yaml" >> $ANSIBLE_CFG_FILE
+    fi
     echo "callbacks_enabled = ansible.posix.profile_tasks, ansible.posix.timer" >> $ANSIBLE_CFG_FILE
+
     echo "Enabling Mitogen for Ansible."
     local venvs=$(pipx list | grep -F "venvs are in " | awk '{print $4;}')
     local python_version=$(python3 --version | awk '{print $2;}' | cut -d. -f1,2)
