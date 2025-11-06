@@ -43,9 +43,8 @@ if [ -z "$ANSIBLE_CONFIGURED" ]; then
     if [ -f "$VAULT_PASS_FILE" ]; then
         echo "vault_password_file=$VAULT_PASS_FILE" >> $ANSIBLE_CFG_FILE
     fi
-    if [ "$UNDER_CI" = "true"  ]; then
-        echo "result_format=yaml" >> $ANSIBLE_CFG_FILE
-    fi
+    echo "callback_result_format=yaml" >> $ANSIBLE_CFG_FILE
+    echo "bin_ansible_callbacks=True" >> $ANSIBLE_CFG_FILE
     echo "callbacks_enabled = ansible.posix.profile_tasks, ansible.posix.timer" >> $ANSIBLE_CFG_FILE
 
     echo "Enabling Mitogen for Ansible."
