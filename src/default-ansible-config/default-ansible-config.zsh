@@ -5,13 +5,7 @@ set -e -u -o pipefail
 local VAULT_PASS_DIR="$HOME/bin"
 local VAULT_PASS_FILE="$VAULT_PASS_DIR/ansible-vault-pass.sh"
 local ANSIBLE_CFG_FILE="$HOME/.ansible.cfg"
-local UNDER_CI="false"
-
-if [[ -z "$CI" || "$CI" == "false" ]]; then
-    UNDER_CI="false"
-else
-    UNDER_CI="true"
-fi
+local UNDER_CI="${CI:-false}"
 
 echo "Running under CI: $UNDER_CI"
 
