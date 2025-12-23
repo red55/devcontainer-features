@@ -39,19 +39,22 @@ echo ""
 local ANSIBLE_CONFIGURED=$(test -f "$ANSIBLE_CFG_FILE" && grep -F "vault_password_file=" "$ANSIBLE_CFG_FILE")
 if [ -z "$ANSIBLE_CONFIGURED" ]; then
     echo "Ansible configuration located at $ANSIBLE_CFG_FILE"
-    echo "[defaults]" >> $ANSIBLE_CFG_FILE
+    local venvs=$(pipx list | grep -F "venvs are in " | awk '{print $4;}')
+    local python_version=$(python3 --version | awk '{print $2;}' | cut -d. -f1,2)
+    local mitogen_base_dir="$venvs/ansible-core/lib/python$python_version/site-packages/ansible_mitogen"
+    echo "Enabling Ansible Mitogen strategy plugin."
+    sudo sed -i 's/^\(ANSIBLE_VERSION_MAX *= *(\)[0-9]\+, *[0-9]\+)\(.*\)$/\1 2, 20)\2/' "$mitogen_base_dir/loaders.py"
+cat << EOF > $ANSIBLE_CFG_FILE
+[defaults]
+callback_result_format=yaml
+bin_ansible_callbacks=True
+callbacks_enabled=ansible.posix.profile_tasks,ansible.posix.timer
+strategy_plugins=$mitogen_base_dir/plugins/strategy
+strategy=mitogen_linear
+EOF
     if [ -f "$VAULT_PASS_FILE" ]; then
         echo "vault_password_file=$VAULT_PASS_FILE" >> $ANSIBLE_CFG_FILE
     fi
-    echo "callback_result_format=yaml" >> $ANSIBLE_CFG_FILE
-    echo "bin_ansible_callbacks=True" >> $ANSIBLE_CFG_FILE
-    echo "callbacks_enabled = ansible.posix.profile_tasks, ansible.posix.timer" >> $ANSIBLE_CFG_FILE
-
-    echo "Enabling Mitogen for Ansible."
-    local venvs=$(pipx list | grep -F "venvs are in " | awk '{print $4;}')
-    local python_version=$(python3 --version | awk '{print $2;}' | cut -d. -f1,2)
-    echo "strategy_plugins=$venvs/ansible-core/lib/python$python_version/site-packages/ansible_mitogen/plugins/strategy" >> $ANSIBLE_CFG_FILE
-    echo "strategy=mitogen_linear" >> $ANSIBLE_CFG_FILE
 else
     echo "Ansible is already configured."
 fi
