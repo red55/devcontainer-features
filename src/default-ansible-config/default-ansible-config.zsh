@@ -51,6 +51,10 @@ bin_ansible_callbacks=True
 callbacks_enabled=ansible.posix.profile_tasks,ansible.posix.timer
 strategy_plugins=$mitogen_base_dir/plugins/strategy
 strategy=mitogen_linear
+gathering = smart
+fact_caching = jsonfile
+fact_caching_timeout = 600
+fact_caching_connection = /tmp/.ansible/fact_cache
 EOF
     if [ -f "$VAULT_PASS_FILE" ]; then
         echo "vault_password_file=$VAULT_PASS_FILE" >> $ANSIBLE_CFG_FILE
